@@ -1,9 +1,51 @@
 # DEVOPS TOOLING WEBSITE SOLUTION
 
-## TASK
+ ## PROJECT OVERVIEW
 
-To implement a 2-tier web application architecture with a single database (MySQL) and an NFS server as shared file storage.
+This project demonstrates the deployment of a 3-tier web application architecture using AWS. The architecture includes:
 
+2 Web Servers (Apache + PHP) – for serving a tooling website
+
+1 MySQL Database Server – for storing user and application data
+
+1 NFS Server – to provide shared file storage across web servers
+
+1 Apache Load Balancer – to distribute traffic evenly across both web servers
+The objective is to build a scalable, fault-tolerant, and highly available infrastructure for hosting a PHP-based tooling application.
+
+ # KEY TECHNOLOGIES & WHY THEY WERE USED
+
+1. Amazon EC2
+
+Used to create virtual servers to host each layer of the architecture. EC2 provides scalability and control over computing resources.
+
+2. EBS Volumes
+
+Used for persistent block storage. We attached EBS volumes to the NFS server so it can store shared web content and logs.
+
+3. LVM (Logical Volume Manager)
+
+LVM was used to group multiple EBS volumes into a single volume group and create flexible partitions. This makes it easier to manage, resize, and allocate storage dynamically.
+
+4. XFS File System
+
+We formatted the logical volumes with xfs, a high-performance file system optimized for large files and directories. It's the default file system in RHEL-based systems and ideal for a server environment.
+
+5. NFS (Network File System)
+
+Chosen to allow both web servers to access a centralized directory (/var/www and /var/log/httpd) hosted on the NFS server. This ensures consistency across all servers.
+
+6. MySQL
+
+MySQL was used to store backend data of the tooling website. It's lightweight, fast, and easy to manage.
+
+7. Apache + PHP
+
+Apache HTTP Server and PHP were installed on the web servers to serve dynamic content and connect to the MySQL backend.
+
+8. Apache Load Balancer
+
+Apache was configured on a separate EC2 instance to distribute web traffic between the two web servers using the lbmethod=byrequests policy.
 
 ## STEP ONE: SETTING UP THE NFS SERVER
 
@@ -304,6 +346,13 @@ Add:
 ```
 <web1-private-ip> web1
 <web2-private-ip> web2
+```
+
+Update Apache config:
+
+```
+BalancerMember http://web1
+BalancerMember http://web2
 ```
 
 5. **Restart Apache and Test**
